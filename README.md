@@ -1,4 +1,7 @@
 # docker-alpine-python
+
+[![Build Status](https://img.shields.io/travis/JayH5/docker-alpine-python/develop.svg)](https://travis-ci.org/JayH5/docker-alpine-python)
+
 Full-fat cPython Docker images based on Alpine Linux
 
 These images are like the [official](https://hub.docker.com/_/python/) Python Docker images in that they contain build tools and development libraries but are based on Alpine Linux instead of Debian.
