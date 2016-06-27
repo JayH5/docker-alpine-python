@@ -1,0 +1,29 @@
+sudo: required
+language: python
+services:
+  - docker
+
+env:
+  global:
+    - REGISTRY_USER=jamiehewland
+    - secure: "2ZING3+FRFAVv/d1TlaGMahl3Pg32+jf/inEZ7QjggNXeBPk7zTGl9Mbiln1PXvkzWmUwqz0hqCWnHGK0HNTW3dBP5Pjt+ZpRSouJMtgIvfrkChkIT4/u/9YaOK10Z+nHEHGNus10y5XN5DbfK7mvzABKyRRDaja2pJ5zoElzfQLDu+qhO97nwgzuysE9AR4pNIyeoUew646FjlLWbvmZuFFMLg1niWhy2D0d3YAQ03ixBxNPxganvF+8+bcF/XA4iUIPHgnXHY2YaTuoT96LhnfOSGuw03CjIS3E9jsrOwvLuEI0hsLQgwfJVBE0/KoLKOrK1nLirll4ZLZN+vuyGFUoKNK/X/uF/odt+5H+gQlMf1VnXEYZGsiObueZV75EXTxnEl3uLKlnG5CcbbH+tTMFQYQR8KyfxCmcnV2VnSIG8IhAk0UjH6Xm0Nvb4k1Zj6yESWgHCA47cXlS8xuQ0ug5qnf4x1Gy8W+DJb6cO6/eZ8LG7/0LIQ5bZ2zGQcbwYzb4VlE9wwN9EY+t6H4yChQVwdJyjXPiuRsBxStiL76ijKl2euMZSdrpXk5er23O0gLg9xszGWPj3WgNPbRVyElRw6cTgLbjOffOyrk+PsPpQ4JuhwgfebIqRK5OQ+vk9Dyhgdap+F/IJ80r7FMTMF88EIm2oYG8/CMhRHHZLA="
+  matrix:
+    - VERSION=2.7 VARIANT=
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -o Dpkg::Options::="--force-confold" -y docker-engine
+
+script:
+  - ./build.sh
+
+after_script:
+  - docker images
+
+before_deploy:
+  - pip install docker-ci-deploy
+deploy:
+  provider: script
+  script: ./deploy.sh
+  on:
+    branch: develop
