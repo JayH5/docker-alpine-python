@@ -1,4 +1,4 @@
-FROM jamiehewland/alpine-python:2.7
+FROM praekeltfoundation/alpine-python:2.7
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
