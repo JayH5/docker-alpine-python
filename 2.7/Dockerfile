@@ -42,6 +42,6 @@ RUN set -ex \
                 \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
             \) -exec rm -rf '{}' + \
         && apk del .fetch-deps \
-        && rm -rf /usr/src/python
+        && rm -rf /usr/src/python ~/.cache
 
 CMD ["python2"]
