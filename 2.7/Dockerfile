@@ -33,6 +33,7 @@ RUN set -ex \
         && make install \
         && curl -fSL 'https://bootstrap.pypa.io/get-pip.py' | python2 \
         && pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
+        && [ "$(pip list | awk -F '[ ()]+' '$1 == "pip" { print $2; exit }')" = "$PYTHON_PIP_VERSION" ] \
         && find /usr/local \
                 \( -type d -a -name test -o -name tests \) \
                 -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
