@@ -1,4 +1,4 @@
-FROM jamiehewland/alpine-buildpack-deps:3.4
+FROM praekeltfoundation/alpine-buildpack-deps:3.4
 
 # remove several traces of alpine python
 RUN apk del --purge -r $(apk info | grep '^python')
