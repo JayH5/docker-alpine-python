@@ -28,6 +28,7 @@ RUN set -ex \
         && rm python.tar.xz \
         && cd /usr/src/python \
         && ./configure \
+            --enable-loadable-sqlite-extensions \
             --enable-shared \
             --enable-unicode=ucs4 \
         && make -j$(getconf _NPROCESSORS_ONLN) \
