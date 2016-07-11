@@ -1,6 +1,6 @@
 # docker-alpine-python
 
-[![Build Status](https://img.shields.io/travis/JayH5/docker-alpine-python/develop.svg)](https://travis-ci.org/JayH5/docker-alpine-python)
+[![Build Status](https://img.shields.io/travis/praekeltfoundation/docker-alpine-python/develop.svg)](https://travis-ci.org/praekeltfoundation/docker-alpine-python)
 
 Full-fat cPython Docker images based on Alpine Linux
 
