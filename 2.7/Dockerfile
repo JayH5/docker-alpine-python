@@ -16,28 +16,32 @@ ENV PYTHON_VERSION 2.7.12
 ENV PYTHON_PIP_VERSION 8.1.2
 
 RUN set -ex \
-        && apk add --no-cache --virtual .fetch-deps gnupg \
+        && apk add --no-cache --virtual .fetch-deps gnupg tar \
         && curl -fSL "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" -o python.tar.xz \
         && curl -fSL "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" -o python.tar.xz.asc \
         && export GNUPGHOME="$(mktemp -d)" \
         && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEY" \
         && gpg --batch --verify python.tar.xz.asc python.tar.xz \
         && rm -r "$GNUPGHOME" python.tar.xz.asc \
-        && mkdir -p /usr/src \
-        && tar -xJC /usr/src -f python.tar.xz \
-        && mv "/usr/src/Python-$PYTHON_VERSION" /usr/src/python \
+        && mkdir -p /usr/src/python \
+        && tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
         && rm python.tar.xz \
         && cd /usr/src/python \
-        && ./configure --enable-shared --enable-unicode=ucs4 \
+        && ./configure \
+            --enable-shared \
+            --enable-unicode=ucs4 \
         && make -j$(getconf _NPROCESSORS_ONLN) \
         && make install \
         && curl -fSL 'https://bootstrap.pypa.io/get-pip.py' | python2 \
         && pip install --no-cache-dir --upgrade pip==$PYTHON_PIP_VERSION \
-        && find /usr/local \
+        && [ "$(pip list | awk -F '[ ()]+' '$1 == "pip" { print $2; exit }')" = "$PYTHON_PIP_VERSION" ] \
+        && find /usr/local -depth \
+            \( \
                 \( -type d -a -name test -o -name tests \) \
-                -o \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
-                -exec rm -rf '{}' + \
+                -o \
+                \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
+            \) -exec rm -rf '{}' + \
         && apk del .fetch-deps \
-        && rm -rf /usr/src/python
+        && rm -rf /usr/src/python ~/.cache
 
 CMD ["python2"]
