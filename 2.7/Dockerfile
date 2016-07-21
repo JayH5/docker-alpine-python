@@ -16,7 +16,17 @@ ENV PYTHON_VERSION 2.7.12
 ENV PYTHON_PIP_VERSION 8.1.2
 
 RUN set -ex \
-        && apk add --no-cache --virtual .fetch-deps gnupg tar \
+        && buildDeps=' \
+            gnupg \
+            tar \
+            tcl-dev \
+            tk-dev \
+        ' \
+        && runDeps=' \
+            tcl \
+            tk \
+        ' \
+        && apk add --no-cache $runDeps $buildDeps \
         && curl -fSL "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" -o python.tar.xz \
         && curl -fSL "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" -o python.tar.xz.asc \
         && export GNUPGHOME="$(mktemp -d)" \
@@ -41,7 +51,7 @@ RUN set -ex \
                 -o \
                 \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
             \) -exec rm -rf '{}' + \
-        && apk del .fetch-deps \
+        && apk del $buildDeps \
         && rm -rf /usr/src/python ~/.cache
 
 CMD ["python2"]
