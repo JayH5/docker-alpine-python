@@ -1,7 +1,20 @@
 FROM praekeltfoundation/alpine-buildpack-deps:3.4
 
-# remove several traces of alpine python
-RUN apk del --purge -r $(apk info | grep '^python')
+# rename many traces of Alpine Python (so that they are not used by mistake)
+# In the upstream Debian-based images similar files are dpkg-divert'ed but
+# Alpine's package manager doesn't have this (obscure) functionality so we just
+# rename the files (deleting wouldn't have any advantage since files exist in
+# lower layers). We rename all the files in the 'python' package.
+RUN set -ex \
+        && for bits in \
+            /usr/bin/idle \
+            /usr/bin/py* \
+            /usr/bin/smtpd.py \
+            /usr/include/*python* \
+            /usr/lib/*python* \
+        ; do \
+            mv "$bits" "$bits.distrib"; \
+        done
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
