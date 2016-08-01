@@ -1,9 +1,11 @@
 FROM praekeltfoundation/alpine-buildpack-deps:3.4
 
 # delete many traces of Alpine Python (so that they are not used by mistake)
-# In the upstream Debian-based images similar files are dpkg-divert'ed but
-# Alpine's package manager doesn't have this (obscure) functionality so we just
-# delete the files in the single Python package that is installed.
+# We can't just uninstall the Python package as we still want things that depend
+# on it (e.g. libevent, pcre). We replace this Python with our version built
+# from source. In the upstream Debian-based images, the package files are
+# dpkg-divert'ed, but Alpine's package manager doesn't have this (obscure)
+# functionality so instead we just delete the files.
 RUN rm $(apk info -q --contents python)
 
 # http://bugs.python.org/issue19846
