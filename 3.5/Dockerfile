@@ -1,7 +1,12 @@
 FROM praekeltfoundation/alpine-buildpack-deps:3.4
 
-# remove several traces of alpine python
-RUN apk del --purge -r $(apk info | grep '^python')
+# delete many traces of Alpine Python (so that they are not used by mistake)
+# We can't just uninstall the Python package as we still want things that depend
+# on it (e.g. libevent, pcre). We replace this Python with our version built
+# from source. In the upstream Debian-based images, the package files are
+# dpkg-divert'ed, but Alpine's package manager doesn't have this (obscure)
+# functionality so instead we just delete the files.
+RUN rm $(apk info -q --contents python)
 
 # http://bugs.python.org/issue19846
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
