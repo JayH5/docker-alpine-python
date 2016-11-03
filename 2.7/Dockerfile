@@ -29,7 +29,6 @@ RUN set -ex \
         && rm python.tar.xz \
         \
         && apk add --no-cache --virtual .build-deps  \
-            gdbm-dev \
             tcl-dev \
             tk \
             tk-dev \
