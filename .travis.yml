@@ -32,6 +32,6 @@ before_deploy:
   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
 deploy:
   provider: script
-  script: ./deploy.py "$image" "$version"
+  script: ./deploy.py "$image" "$version" && if [[ -z "$VARIANT" ]]; then ./deploy.sh "${image}-onbuild" "$version"; fi
   on:
     branch: develop
