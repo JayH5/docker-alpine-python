@@ -23,7 +23,7 @@ before_script:
 script:
   - docker build -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
   # the "onbuild" variant has to happen with the base variant because it's FROM it
-  - if [[ -z "$VARIANT" ]]; then docker build -t "${image}-onbuild" onbuild; fi
+  - if [[ -z "$VARIANT" ]]; then docker build -t "${image}-onbuild" "$VERSION/onbuild"; fi
 
 after_script:
   - docker images
