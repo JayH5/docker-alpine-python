@@ -4,6 +4,7 @@ import unittest
 
 from deploy import generate_versioned_tags, main, split_image_tag
 
+
 class TestMain(unittest.TestCase):
     def test_main(self):
         main(['python:2.7', '2.7.12', '--dry-run'])
