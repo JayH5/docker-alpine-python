@@ -27,7 +27,7 @@ script:
   - docker build -t "$image" "$VERSION"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
-  - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python $VERSION"
+  - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
   # Build the onbuild variant because it's FROM the single variant we build
   - docker build -t "${image}-onbuild" "$VERSION/onbuild"
 
