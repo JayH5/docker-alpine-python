@@ -17,7 +17,7 @@ before_install:
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
-  - pip install coverage
+  - pip install coverage flake8
 
 before_script:
   - image="$(awk '$1 == "FROM" { print $2; exit }' $VERSION/onbuild/Dockerfile)"
@@ -33,6 +33,7 @@ script:
   - docker build -t "${image}-onbuild" "$VERSION/onbuild"
   # Also make sure our deploy script works
   - coverage run --source=deploy.py ./test_deploy.py && coverage report -m
+  - flake8 .
 
 after_script:
   - docker images
