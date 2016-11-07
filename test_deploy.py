@@ -1,7 +1,23 @@
 #!/usr/bin/env python
+import sys
 import unittest
 
-from deploy import generate_versioned_tags, split_image_tag
+from deploy import generate_versioned_tags, main, split_image_tag
+
+class TestMain(unittest.TestCase):
+    def test_main(self):
+        main(['python:2.7', '2.7.12', '--dry-run'])
+        # NOTE: This requires Python 2.7+ and that the tests are run in
+        # buffered mode.
+        output = sys.stdout.getvalue().strip().split('\n')
+        self.assertEqual(output, [
+            'docker tag python:2.7 python:2.7.12',
+            'docker tag python:2.7 python:2.7',
+            'docker tag python:2.7 python:2',
+            'docker push python:2.7.12',
+            'docker push python:2.7',
+            'docker push python:2',
+        ])
 
 
 class TestSplitImageTag(unittest.TestCase):
@@ -39,4 +55,4 @@ class TestGenerateVersionTag(unittest.TestCase):
         self.assertEqual(versioned_tags, ['5.4.1', '5.4', '5'])
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(buffer=True)

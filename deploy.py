@@ -3,10 +3,11 @@ from __future__ import print_function
 
 import argparse
 import re
+import sys
 import subprocess
 
 
-def main():
+def main(raw_args=sys.argv[1:]):
     parser = argparse.ArgumentParser(
         description='Tag Docker images with a version and push the tags')
     parser.add_argument(
@@ -17,7 +18,7 @@ def main():
         '-d', '--dry-run', action='store_true',
         help="don't execute any Docker commands, just print them")
 
-    args = parser.parse_args()
+    args = parser.parse_args(raw_args)
     image_tag, version, dry_run = args.image_tag, args.version, args.dry_run
 
     image, tag = split_image_tag(image_tag)
@@ -100,5 +101,5 @@ def cmd(*args, **kwargs):
         return
     subprocess.check_call(args)
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     main()
