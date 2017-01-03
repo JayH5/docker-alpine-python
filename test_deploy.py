@@ -55,5 +55,6 @@ class TestGenerateVersionTag(unittest.TestCase):
         versioned_tags = generate_versioned_tags(None, '5.4.1')
         self.assertEqual(versioned_tags, ['5.4.1', '5.4', '5'])
 
+
 if __name__ == '__main__':
     unittest.main(buffer=True)

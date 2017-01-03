@@ -101,5 +101,6 @@ def cmd(*args, **kwargs):
         return
     subprocess.check_call(args)
 
+
 if __name__ == '__main__':  # pragma: no cover
     main()
