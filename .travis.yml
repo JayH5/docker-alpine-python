@@ -33,7 +33,7 @@ script:
   # Build the onbuild variant because it's FROM the single variant we build
   - docker build -t "${image}-onbuild" "$VERSION/onbuild"
   # Also make sure our deploy script works
-  - coverage run --source=deploy.py ./test_deploy.py && coverage report -m
+  - coverage run --include=deploy.py ./test_deploy.py && coverage report -m
   - flake8 .
 
 after_script:
