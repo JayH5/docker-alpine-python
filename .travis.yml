@@ -25,14 +25,16 @@ before_script:
   - image="$(awk '$1 == "FROM" { print $2; exit }' $VERSION/onbuild/Dockerfile)"
   - version="$(awk '$2 == "PYTHON_VERSION" { print $3; exit }' $VERSION/Dockerfile)"
   - echo "Building image $image with Python version $version"
+  # Pull the existing image to use as a cache
+  - docker pull "${image}-onbuild"
 
 script:
-  - docker build -t "$image" "$VERSION"
+  - docker build --pull --cache-from "${image}-onbuild" -t "$image" "$VERSION"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
   - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
   # Build the onbuild variant because it's FROM the single variant we build
-  - docker build -t "${image}-onbuild" "$VERSION/onbuild"
+  - docker build --cache-from "${image}-onbuild" -t "${image}-onbuild" "$VERSION/onbuild"
 
 after_script:
   - docker images
