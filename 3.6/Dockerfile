@@ -81,4 +81,8 @@ RUN cd /usr/local/bin \
         && ln -s python3 python \
         && ln -s python3-config python-config
 
+# HACK: Fix for building numpy
+# https://github.com/docker-library/python/issues/112#issuecomment-238383259
+RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+
 CMD ["python3"]
