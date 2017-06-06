@@ -31,7 +31,7 @@ before_script:
   - docker pull "$cache_from" || true
 
 script:
-  - docker build --pull --cache-from "$cache_from" -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
+  - travis_retry docker build --pull --cache-from "$cache_from" -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
   - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
