@@ -9,9 +9,11 @@ env:
     - secure: "OIjqHeoNs0jHoqk5mAY2qux+qsokxcuwxBDDdbwCyJg0P5EQAu9XakIzThpZZixIJ/3VAATFdHK/xlNzJeanq7LUZr11DJKBD3H7jmYE2hm5+3qjjNh8KW8Z8NluezmwGWz6gkb8sCsgO2+k7sKC+4h4AERBOceF21V+iOUjBeCw1Q9DVDoBEznbIv1MJhe4G8V5Z3PEFaoerJ4Cy1VsEQRpHEzWyIBxgr4mXfGv4H6PLgTTNSs0+afSCJL5Nc5EU67NpLFTPBIS65yD5xDkLA+Tl4cLomJAwZNe8J9+GQWSua9ehqj0kPOuolkxGWZ5M/Z+yk80i9FNy0CdEWoEKrQMOCnnOwK769PWyKyzYCI9FWPky1rRAqFAdGmMspI3i1qm3wMUUERGqB9U0XuywPbrvqTVKqrdWP69Gwx84ZGvxnODN3nW1Yot/M75p9JbwbnBy+4tRDEqdXGbU1hefsCa7nA51CG1v8kybx6BmCRGWPUDTAR1m+ugRWvJjsaGOSILsSjUcQtlZbGSomLz0rJUgQi2qQEPKVbXv9zx8b9lzIYgxpKpLlONDgNBeFiW5RdT7yDvRUpDk0oSUi0YafkVqON6RuyQmmcg/dsXNtPr/712jqGO2BV3YPpiFB8xAZMWnfaBCe9dOSEDdo7f9PFvz0vUjFoeOC0FnVdd4DY="
   matrix:
     # Tag 2.7 as 2, 3.6 as 3 and latest, and 3.5 as just 3.5...
-    - VERSION=2.7 VERSION_LATEST=  SEMVER_PRECISION=1
-    - VERSION=3.5 VERSION_LATEST=  SEMVER_PRECISION=2
-    - VERSION=3.6 VERSION_LATEST=1 SEMVER_PRECISION=1
+    - VERSION=2.7 VARIANT=          VERSION_LATEST=  SEMVER_PRECISION=1
+    - VERSION=2.7 VARIANT=alpine3.6 VERSION_LATEST=  SEMVER_PRECISION=1
+    - VERSION=3.5 VARIANT=          VERSION_LATEST=  SEMVER_PRECISION=2
+    - VERSION=3.6 VARIANT=          VERSION_LATEST=1 SEMVER_PRECISION=1
+    - VERSION=3.6 VARIANT=alpine3.6 VERSION_LATEST=1 SEMVER_PRECISION=1
 
 before_install:
   - sudo apt-get update
@@ -21,19 +23,20 @@ install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
 
 before_script:
-  - image="$(awk '$1 == "FROM" { print $2; exit }' $VERSION/onbuild/Dockerfile)"
+  - image="$(awk '$1 == "FROM" { print $2; exit }' $VERSION/onbuild/Dockerfile)${VARIANT:+-$VARIANT}"
   - version="$(awk '$2 == "PYTHON_VERSION" { print $3; exit }' $VERSION/Dockerfile)"
+  - if [ -z "$VARIANT" ]; then cache_from="${image}-onbuild"; else cache_from="$image"; fi
   - echo "Building image $image with Python version $version"
   # Pull the existing image to use as a cache
-  - docker pull "${image}-onbuild"
+  - docker pull "$cache_from"
 
 script:
-  - docker build --pull --cache-from "${image}-onbuild" -t "$image" "$VERSION"
+  - docker build --pull --cache-from "$cache_from" -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
   - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
-  # Build the onbuild variant because it's FROM the single variant we build
-  - docker build --cache-from "${image}-onbuild" -t "${image}-onbuild" "$VERSION/onbuild"
+  # Build the onbuild variant with the base variant because it's FROM it
+  - [ -n "$VARIANT" ] || docker build --cache-from "$cache_from" -t "${image}-onbuild" "$VERSION/onbuild"
 
 after_script:
   - docker images
@@ -41,8 +44,9 @@ after_script:
 before_deploy:
   - pip install docker-ci-deploy==0.3.0
   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
+  - [ -n "$VARIANT" ] || extra_tags="${image}-onbuild"
 deploy:
   provider: script
-  script: dcd -V "$version" ${VERSION_LATEST:+-L} -S -P "$SEMVER_PRECISION" "$image" "${image}-onbuild"
+  script: dcd -V "$version" ${VERSION_LATEST:+-L} -S -P "$SEMVER_PRECISION" "$image" $extra_tags
   on:
     branch: develop
