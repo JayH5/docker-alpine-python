@@ -28,7 +28,7 @@ before_script:
   - if [ -z "$VARIANT" ]; then cache_from="${image}-onbuild"; else cache_from="$image"; fi
   - echo "Building image $image with Python version $version"
   # Pull the existing image to use as a cache
-  - docker pull "$cache_from"
+  - docker pull "$cache_from" || true
 
 script:
   - docker build --pull --cache-from "$cache_from" -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
