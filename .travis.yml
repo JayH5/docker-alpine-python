@@ -36,7 +36,7 @@ script:
   # ones to get the same tests
   - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
   # Build the onbuild variant with the base variant because it's FROM it
-  - [ -n "$VARIANT" ] || docker build --cache-from "$cache_from" -t "${image}-onbuild" "$VERSION/onbuild"
+  - '[ -n "$VARIANT" ] || docker build --cache-from "$cache_from" -t "${image}-onbuild" "$VERSION/onbuild"'
 
 after_script:
   - docker images
@@ -44,7 +44,7 @@ after_script:
 before_deploy:
   - pip install docker-ci-deploy==0.3.0
   - docker login -u "$REGISTRY_USER" -p "$REGISTRY_PASS"
-  - [ -n "$VARIANT" ] || extra_tags="${image}-onbuild"
+  - '[ -n "$VARIANT" ] || extra_tags="${image}-onbuild"'
 deploy:
   provider: script
   script: dcd -V "$version" ${VERSION_LATEST:+-L} -S -P "$SEMVER_PRECISION" "$image" $extra_tags
