@@ -23,20 +23,21 @@ install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
 
 before_script:
-  - image="$(awk '$1 == "FROM" { print $2; exit }' $VERSION/onbuild/Dockerfile)${VARIANT:+-$VARIANT}"
-  - version="$(awk '$2 == "PYTHON_VERSION" { print $3; exit }' $VERSION/Dockerfile)"
-  - if [ -z "$VARIANT" ]; then cache_from="${image}-onbuild"; else cache_from="$image"; fi
+  - cd "$VERSION"
+  - image="$(awk '$1 == "FROM" { print $2; exit }' onbuild/Dockerfile)${VARIANT:+-$VARIANT}"
+  - version="$(awk '$2 == "PYTHON_VERSION" { print $3; exit }' Dockerfile)"
   - echo "Building image $image with Python version $version"
   # Pull the existing image to use as a cache
-  - docker pull "$cache_from" || true
+  - docker pull "$image" || true
+  - '[ -n "$VARIANT" ] || docker pull "${image}-onbuild" || true'
 
 script:
-  - travis_retry docker build --pull --cache-from "$cache_from" -t "$image" "$VERSION${VARIANT:+/$VARIANT}"
+  - travis_retry docker build --pull --cache-from "$image" -t "$image" "${VARIANT:-.}"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
   - docker tag "$image" "python:$VERSION" && ~/official-images/test/run.sh "python:$VERSION"
   # Build the onbuild variant with the base variant because it's FROM it
-  - '[ -n "$VARIANT" ] || docker build --cache-from "$cache_from" -t "${image}-onbuild" "$VERSION/onbuild"'
+  - '[ -n "$VARIANT" ] || docker build --cache-from "${image}-onbuild" -t "${image}-onbuild" onbuild'
 
 after_script:
   - docker images
