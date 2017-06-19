@@ -40,6 +40,8 @@ RUN set -ex \
             --build="$gnuArch" \
             --enable-loadable-sqlite-extensions \
             --enable-shared \
+            --with-system-expat \
+            --with-system-libffi \
             --without-ensurepip \
         && make -j$(nproc) \
         && make install \
