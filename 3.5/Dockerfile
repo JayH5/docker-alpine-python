@@ -11,10 +11,6 @@ ENV GPG_KEY 97FC712E4C024BBEA48A61ED3A5CA953F73C700D
 ENV PYTHON_VERSION 3.5.3
 
 RUN set -ex \
-        && apk add --no-cache --virtual .fetch-deps \
-            gnupg \
-            tar \
-        \
         && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
         && wget -O python.tar.xz.asc "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz.asc" \
         && export GNUPGHOME="$(mktemp -d)" \
@@ -31,8 +27,6 @@ RUN set -ex \
             tcl-dev \
             tk \
             tk-dev \
-# add build deps before removing fetch deps in case there's overlap
-        && apk del .fetch-deps \
         \
         && cd /usr/src/python \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
