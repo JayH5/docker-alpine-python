@@ -15,10 +15,6 @@ env:
     - VERSION=3.6 VARIANT=          VERSION_LATEST=1 SEMVER_PRECISION=1
     - VERSION=3.6 VARIANT=alpine3.6 VERSION_LATEST=1 SEMVER_PRECISION=1
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install -o Dpkg::Options::="--force-confold" -y docker-engine
-
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
 
