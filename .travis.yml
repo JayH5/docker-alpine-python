@@ -50,4 +50,4 @@ deploy:
   provider: script
   script: dcd -V "$version" ${VERSION_LATEST:+-L} -S -P "$SEMVER_PRECISION" "$image" $extra_tags
   on:
-    branch: develop
+    branch: master
