@@ -1,4 +1,4 @@
-FROM praekeltfoundation/alpine-buildpack-deps:3.6
+FROM praekeltfoundation/alpine-buildpack-deps:3.4
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -7,8 +7,8 @@ ENV PATH /usr/local/bin:$PATH
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
 
-ENV GPG_KEY C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
-ENV PYTHON_VERSION 2.7.14
+ENV GPG_KEY 97FC712E4C024BBEA48A61ED3A5CA953F73C700D
+ENV PYTHON_VERSION 3.5.4
 
 RUN set -ex \
         && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
@@ -32,8 +32,11 @@ RUN set -ex \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
         && ./configure \
             --build="$gnuArch" \
+            --enable-loadable-sqlite-extensions \
             --enable-shared \
-            --enable-unicode=ucs4 \
+            --with-system-expat \
+            --with-system-libffi \
+            --without-ensurepip \
         && make -j$(nproc) \
 # set thread stack size to 1MB so we don't segfault before we hit sys.getrecursionlimit()
 # https://github.com/alpinelinux/aports/commit/2026e1259422d4e0cf92391ca2d3844356c649d0
@@ -57,6 +60,13 @@ RUN set -ex \
                 \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
             \) -exec rm -rf '{}' + \
         && rm -rf /usr/src/python
+
+# make some useful symlinks that are expected to exist
+RUN cd /usr/local/bin \
+        && ln -s idle3 idle \
+        && ln -s pydoc3 pydoc \
+        && ln -s python3 python \
+        && ln -s python3-config python-config
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
 ENV PYTHON_PIP_VERSION 9.0.1
@@ -84,4 +94,4 @@ RUN set -ex; \
 # https://github.com/docker-library/python/issues/112#issuecomment-238383259
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
-CMD ["python2"]
+CMD ["python3"]

@@ -8,7 +8,7 @@ ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
 
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
-ENV PYTHON_VERSION 3.6.3
+ENV PYTHON_VERSION 3.6.4
 
 RUN set -ex \
         && apk add --no-cache --virtual .fetch-deps \
@@ -39,6 +39,9 @@ RUN set -ex \
             --with-system-libffi \
             --without-ensurepip \
         && make -j$(nproc) \
+# set thread stack size to 1MB so we don't segfault before we hit sys.getrecursionlimit()
+# https://github.com/alpinelinux/aports/commit/2026e1259422d4e0cf92391ca2d3844356c649d0
+            EXTRA_CFLAGS="-DTHREAD_STACK_SIZE=0x100000" \
         && make install \
         \
         && runDeps="$( \
