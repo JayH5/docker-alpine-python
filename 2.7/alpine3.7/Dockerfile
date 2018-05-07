@@ -8,7 +8,7 @@ ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
 
 ENV GPG_KEY C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
-ENV PYTHON_VERSION 2.7.14
+ENV PYTHON_VERSION 2.7.15
 
 RUN set -ex \
         && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
@@ -24,6 +24,8 @@ RUN set -ex \
         && apk add --no-cache --virtual .build-deps  \
             coreutils \
             dpkg-dev dpkg \
+            libnsl-dev \
+            libtirpc-dev \
             tcl-dev \
             tk \
             tk-dev \
@@ -59,7 +61,7 @@ RUN set -ex \
         && rm -rf /usr/src/python
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 9.0.3
+ENV PYTHON_PIP_VERSION 10.0.1
 
 RUN set -ex; \
         \
