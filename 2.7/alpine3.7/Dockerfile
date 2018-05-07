@@ -24,6 +24,8 @@ RUN set -ex \
         && apk add --no-cache --virtual .build-deps  \
             coreutils \
             dpkg-dev dpkg \
+            libnsl-dev \
+            libtirpc-dev \
             tcl-dev \
             tk \
             tk-dev \
