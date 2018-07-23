@@ -9,6 +9,7 @@ ENV LANG C.UTF-8
 
 # extra dependencies (over what alpine-buildpack-deps already includes)
 RUN apk add --no-cache \
+        tk \
         tk-dev
 
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
