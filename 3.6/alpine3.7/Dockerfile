@@ -92,8 +92,4 @@ RUN set -ex; \
             \) -exec rm -rf '{}' +; \
         rm -f get-pip.py
 
-# HACK: Fix for building numpy
-# https://github.com/docker-library/python/issues/112#issuecomment-238383259
-RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
-
 CMD ["python3"]
