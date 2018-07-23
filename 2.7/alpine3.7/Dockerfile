@@ -7,6 +7,11 @@ ENV PATH /usr/local/bin:$PATH
 # > At the moment, setting "LANG=C" on a Linux system *fundamentally breaks Python 3*, and that's not OK.
 ENV LANG C.UTF-8
 
+# extra dependencies (over what alpine-buildpack-deps already includes)
+RUN apk add --no-cache \
+        tk \
+        tk-dev
+
 ENV GPG_KEY C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
 ENV PYTHON_VERSION 2.7.15
 
@@ -16,6 +21,7 @@ RUN set -ex \
         && export GNUPGHOME="$(mktemp -d)" \
         && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "$GPG_KEY" \
         && gpg --batch --verify python.tar.xz.asc python.tar.xz \
+        && { command -v gpgconf > /dev/null && gpgconf --kill all || :; } \
         && rm -rf "$GNUPGHOME" python.tar.xz.asc \
         && mkdir -p /usr/src/python \
         && tar -xJC /usr/src/python --strip-components=1 -f python.tar.xz \
@@ -24,11 +30,9 @@ RUN set -ex \
         && apk add --no-cache --virtual .build-deps  \
             coreutils \
             dpkg-dev dpkg \
+            findutils \
             libnsl-dev \
             libtirpc-dev \
-            tcl-dev \
-            tk \
-            tk-dev \
         \
         && cd /usr/src/python \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
@@ -42,14 +46,11 @@ RUN set -ex \
             EXTRA_CFLAGS="-DTHREAD_STACK_SIZE=0x100000" \
         && make install \
         \
-        && runDeps="$( \
-            scanelf --needed --nobanner --recursive /usr/local \
-                | awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
+        && find /usr/local -type f -executable -exec scanelf --needed --nobanner --format '%n#p' '{}' ';' \
+                | tr ',' '\n' \
                 | sort -u \
-                | xargs -r apk info --installed \
-                | sort -u \
-        )" \
-        && apk add --virtual .python-rundeps $runDeps \
+                | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+                | xargs -rt apk add --virtual .python-rundeps \
         && apk del .build-deps \
         \
         && find /usr/local -depth \
@@ -61,7 +62,7 @@ RUN set -ex \
         && rm -rf /usr/src/python
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 10.0.1
+ENV PYTHON_PIP_VERSION 18.0
 
 RUN set -ex; \
         \
@@ -81,9 +82,5 @@ RUN set -ex; \
                 \( -type f -a -name '*.pyc' -o -name '*.pyo' \) \
             \) -exec rm -rf '{}' +; \
         rm -f get-pip.py
-
-# HACK: Fix for building numpy
-# https://github.com/docker-library/python/issues/112#issuecomment-238383259
-RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
 CMD ["python2"]

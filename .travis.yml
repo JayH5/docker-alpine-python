@@ -12,18 +12,24 @@ env:
   global:
     - IMAGE_NAME=praekeltfoundation/alpine-python
     - REGISTRY_USER=praekeltorgdeploy
+    - PGP_HAPPY_EYEBALLS_REF=a590d20d23389b3a880a743ae6ada64506907769
     - secure: "OIjqHeoNs0jHoqk5mAY2qux+qsokxcuwxBDDdbwCyJg0P5EQAu9XakIzThpZZixIJ/3VAATFdHK/xlNzJeanq7LUZr11DJKBD3H7jmYE2hm5+3qjjNh8KW8Z8NluezmwGWz6gkb8sCsgO2+k7sKC+4h4AERBOceF21V+iOUjBeCw1Q9DVDoBEznbIv1MJhe4G8V5Z3PEFaoerJ4Cy1VsEQRpHEzWyIBxgr4mXfGv4H6PLgTTNSs0+afSCJL5Nc5EU67NpLFTPBIS65yD5xDkLA+Tl4cLomJAwZNe8J9+GQWSua9ehqj0kPOuolkxGWZ5M/Z+yk80i9FNy0CdEWoEKrQMOCnnOwK769PWyKyzYCI9FWPky1rRAqFAdGmMspI3i1qm3wMUUERGqB9U0XuywPbrvqTVKqrdWP69Gwx84ZGvxnODN3nW1Yot/M75p9JbwbnBy+4tRDEqdXGbU1hefsCa7nA51CG1v8kybx6BmCRGWPUDTAR1m+ugRWvJjsaGOSILsSjUcQtlZbGSomLz0rJUgQi2qQEPKVbXv9zx8b9lzIYgxpKpLlONDgNBeFiW5RdT7yDvRUpDk0oSUi0YafkVqON6RuyQmmcg/dsXNtPr/712jqGO2BV3YPpiFB8xAZMWnfaBCe9dOSEDdo7f9PFvz0vUjFoeOC0FnVdd4DY="
   matrix:
-    # Tag 2.7 as 2, 3.6 as 3 and latest, and 3.5 as just 3.5...
+    # Tag 2.7 as 2, 3.7 as 3 and latest, and 3.6 as just 3.6...
     - PYTHON_VERSION=2.7 PYTHON_LATEST=  ALPINE_VERSION=3.6 ALPINE_LATEST=  SEMVER_PRECISION=1
-    - PYTHON_VERSION=2.7 PYTHON_LATEST=  ALPINE_VERSION=3.7 ALPINE_LATEST=1 SEMVER_PRECISION=1
-    - PYTHON_VERSION=3.6 PYTHON_LATEST=1 ALPINE_VERSION=3.6 ALPINE_LATEST=  SEMVER_PRECISION=1
-    - PYTHON_VERSION=3.6 PYTHON_LATEST=1 ALPINE_VERSION=3.7 ALPINE_LATEST=1 SEMVER_PRECISION=1
+    - PYTHON_VERSION=2.7 PYTHON_LATEST=  ALPINE_VERSION=3.7 ALPINE_LATEST=  SEMVER_PRECISION=1
+    - PYTHON_VERSION=2.7 PYTHON_LATEST=  ALPINE_VERSION=3.8 ALPINE_LATEST=1 SEMVER_PRECISION=1
+    - PYTHON_VERSION=3.6 PYTHON_LATEST=  ALPINE_VERSION=3.6 ALPINE_LATEST=  SEMVER_PRECISION=2
+    - PYTHON_VERSION=3.6 PYTHON_LATEST=  ALPINE_VERSION=3.7 ALPINE_LATEST=  SEMVER_PRECISION=2
+    - PYTHON_VERSION=3.6 PYTHON_LATEST=  ALPINE_VERSION=3.8 ALPINE_LATEST=1 SEMVER_PRECISION=2
+    - PYTHON_VERSION=3.7 PYTHON_LATEST=1 ALPINE_VERSION=3.8 ALPINE_LATEST=1 SEMVER_PRECISION=1
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
 
 before_script:
+  # tianon's hack to get PGP to work vaguely reliably
+  - wget -qO- "https://github.com/tianon/pgp-happy-eyeballs/raw/$PGP_HAPPY_EYEBALLS_REF/hack-my-builds.sh" | bash
   - cd "$PYTHON_VERSION"
   - variant="alpine$ALPINE_VERSION"; tag="$PYTHON_VERSION-$variant"
   - image="$IMAGE_NAME:$tag"
@@ -33,7 +39,7 @@ before_script:
   - docker pull "$image" || true
 
 script:
-  - travis_retry docker build --pull --cache-from "$image" -t "$image" "$variant"
+  - docker build --pull --cache-from "$image" -t "$image" "$variant"
   # Run the "official-images" tests, but first tag our image like the official
   # ones to get the same tests
   - docker tag "$image" "python:$PYTHON_VERSION" && ~/official-images/test/run.sh "python:$PYTHON_VERSION"

@@ -1,4 +1,4 @@
-FROM praekeltfoundation/alpine-buildpack-deps:3.7
+FROM praekeltfoundation/alpine-buildpack-deps:3.8
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
