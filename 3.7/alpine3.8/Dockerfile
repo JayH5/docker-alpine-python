@@ -33,6 +33,7 @@ RUN set -ex \
             findutils \
             libnsl-dev \
             libtirpc-dev \
+            util-linux-dev \
         \
         && cd /usr/src/python \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
