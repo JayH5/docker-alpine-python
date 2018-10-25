@@ -50,7 +50,7 @@ RUN set -ex \
                 | tr ',' '\n' \
                 | sort -u \
                 | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-                | xargs -rt apk add --virtual .python-rundeps \
+                | xargs -rt apk add --no-cache --virtual .python-rundeps \
         && apk del .build-deps \
         \
         && find /usr/local -depth \
@@ -62,7 +62,7 @@ RUN set -ex \
         && rm -rf /usr/src/python
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 18.0
+ENV PYTHON_PIP_VERSION 18.1
 
 RUN set -ex; \
         \

@@ -13,7 +13,7 @@ RUN apk add --no-cache \
         tk-dev
 
 ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
-ENV PYTHON_VERSION 3.7.0
+ENV PYTHON_VERSION 3.7.1
 
 RUN set -ex \
         && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
@@ -33,6 +33,7 @@ RUN set -ex \
             findutils \
             libnsl-dev \
             libtirpc-dev \
+            util-linux-dev \
         \
         && cd /usr/src/python \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
@@ -53,7 +54,7 @@ RUN set -ex \
             | tr ',' '\n' \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-            | xargs -rt apk add --virtual .python-rundeps \
+            | xargs -rt apk add --no-cache --virtual .python-rundeps \
         && apk del .build-deps \
         \
         && find /usr/local -depth \
@@ -72,7 +73,7 @@ RUN cd /usr/local/bin \
         && ln -s python3-config python-config
 
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 18.0
+ENV PYTHON_PIP_VERSION 18.1
 
 RUN set -ex; \
         \
