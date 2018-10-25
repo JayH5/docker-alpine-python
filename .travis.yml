@@ -52,3 +52,10 @@ deploy:
   script: dcd -t $tags -V "$version" ${PYTHON_LATEST:+-L} -S -P "$SEMVER_PRECISION" "$image"
   on:
     branch: master
+
+notifications:
+  slack:
+    rooms:
+      # praekeltfoundation:<token>#docker
+      - secure: "isj3rbKuWLV2dplrRnE2HmftYzwuahMNLlutJ8/kqSMBsuLVXhiKbniPGQaHLiBEayLH+tKBtEF2E3xsZecZ7eKhgNlBGiDF9yDfYntS9LJTmZtemumBIBfkVRCGzGdEJ5vJ/dUH4s0wdgWTKGQYZmwS5poXpsePVpfWzS/Tkz0FUaCYZJlni9QjYK8TrHkclMe4g5vv8tBolpFsq7WL0tbCLN56xOsFB2mbnHAZRcXHEiTl1FXVbqlJ9MWH24q1YQWe8mKNCAuH9wAD0MfDDhxfK+hGf2Kn1ngwa52kaqu8r1RH2cJN7WWKvH/5YxRhif30kTVjeMonMcB4LmLyV9DZO/Ue+34sJBKLet2lD6MzIHOo57e9osrXP8/tLStDsmyC+ceYiicyi9d2olLhgO5mxT4JCHA7P/2y22NlY3e9ZL7uXNiAGuTKxtwTfzmwB+K5FWR57mTZMijFeIi6fkflE39DxhIWYAAShu9W+DeXnjH0fonc0k4JaZLsmJNLUudq8DlLHST8fpvbKf1LwBLrCmvznoTmvw/8Q2DU0yKFhDHTArb7cJRJTPmq9VwQXSR5Hl+tpAqMkG0kW8bZV8Jri2yz5/ql5CQJB7I0hojVWylrrxgTT5+euUqEL4vfGTQCzgDVeItSN/wb9oCGTBnwpE4pCl0oqSsYNMrrLiM="
+    on_pull_requests: false
