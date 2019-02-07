@@ -1,4 +1,4 @@
-FROM praekeltfoundation/alpine-buildpack-deps:3.8
+FROM praekeltfoundation/alpine-buildpack-deps:3.9
 
 # ensure local python is preferred over distribution python
 ENV PATH /usr/local/bin:$PATH
@@ -12,8 +12,8 @@ RUN apk add --no-cache \
         tk \
         tk-dev
 
-ENV GPG_KEY C01E1CAD5EA2C4F0B8E3571504C367C218ADD4FF
-ENV PYTHON_VERSION 2.7.15
+ENV GPG_KEY 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+ENV PYTHON_VERSION 3.7.2
 
 RUN set -ex \
         && wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz" \
@@ -33,13 +33,17 @@ RUN set -ex \
             findutils \
             libnsl-dev \
             libtirpc-dev \
+            util-linux-dev \
         \
         && cd /usr/src/python \
         && gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
         && ./configure \
             --build="$gnuArch" \
+            --enable-loadable-sqlite-extensions \
             --enable-shared \
-            --enable-unicode=ucs4 \
+            --with-system-expat \
+            --with-system-libffi \
+            --without-ensurepip \
         && make -j$(nproc) \
 # set thread stack size to 1MB so we don't segfault before we hit sys.getrecursionlimit()
 # https://github.com/alpinelinux/aports/commit/2026e1259422d4e0cf92391ca2d3844356c649d0
@@ -47,10 +51,10 @@ RUN set -ex \
         && make install \
         \
         && find /usr/local -type f -executable -exec scanelf --needed --nobanner --format '%n#p' '{}' ';' \
-                | tr ',' '\n' \
-                | sort -u \
-                | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-                | xargs -rt apk add --no-cache --virtual .python-rundeps \
+            | tr ',' '\n' \
+            | sort -u \
+            | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+            | xargs -rt apk add --no-cache --virtual .python-rundeps \
         && apk del .build-deps \
         \
         && find /usr/local -depth \
@@ -61,8 +65,15 @@ RUN set -ex \
             \) -exec rm -rf '{}' + \
         && rm -rf /usr/src/python
 
+# make some useful symlinks that are expected to exist
+RUN cd /usr/local/bin \
+        && ln -s idle3 idle \
+        && ln -s pydoc3 pydoc \
+        && ln -s python3 python \
+        && ln -s python3-config python-config
+
 # if this is called "PIP_VERSION", pip explodes with "ValueError: invalid truth value '<VERSION>'"
-ENV PYTHON_PIP_VERSION 18.1
+ENV PYTHON_PIP_VERSION 19.0.1
 
 RUN set -ex; \
         \
@@ -83,4 +94,4 @@ RUN set -ex; \
             \) -exec rm -rf '{}' +; \
         rm -f get-pip.py
 
-CMD ["python2"]
+CMD ["python3"]
